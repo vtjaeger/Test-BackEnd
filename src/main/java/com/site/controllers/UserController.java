@@ -28,53 +28,31 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<UserModel>> getAllUsers(){
-        List<UserModel> userList = userRepository.findAll();
-        return ResponseEntity.status(HttpStatus.OK).body(userList);
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers());
     }
 
     @PostMapping
     public ResponseEntity<UserModel> saveUser(@RequestBody @Valid UserDto userDto){
-        var userModel = new UserModel();
-        BeanUtils.copyProperties(userDto, userModel);
-        UserModel savedUser = userRepository.save(userModel);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+        try{
+            return ResponseEntity.status(HttpStatus.CREATED).body(userService.saveUser(userDto));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UserModel> updateUser(@PathVariable(value = "id") UUID id, @RequestBody @Valid UserDto userDto) {
-        Optional<UserModel> existingUser = userRepository.findById(id);
-
-        if (existingUser.isEmpty()) {
-            throw new RuntimeException("User not found with id: " + id);
-        }
-        UserModel userModel = existingUser.get();
-        if(!userDto.name().isEmpty()){
-            userModel.setName(userDto.name());
-        }
-        if(!userDto.email().isEmpty()){
-            userModel.setEmail(userDto.email());
-        }
-        if(!userDto.password().isEmpty()){
-            userModel.setPassword(userDto.password());
-        }
-        if(!userDto.telephone().isEmpty()){
-            userModel.setTelephone(userDto.telephone());
-        }
-
-        UserModel updatedUser = userRepository.save(userModel);
-
+        UserModel updatedUser = userService.updateUser(id, userDto);
         return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable(value = "id") UUID id) {
-        Optional<UserModel> userDeleted = userRepository.findById(id);
-        if (userDeleted.isPresent()) {
-            UserModel user = userDeleted.get();
-            userRepository.deleteById(user.getId());
-            return ResponseEntity.ok().build();
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 }
