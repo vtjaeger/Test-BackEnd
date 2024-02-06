@@ -1,10 +1,13 @@
 package com.site.services;
 
 import com.site.dto.UserDto;
+import com.site.dto.UserLoginDto;
 import com.site.models.UserModel;
 import com.site.repositories.UserRepository;
+import org.apache.catalina.User;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,8 +18,13 @@ import java.util.UUID;
 
 @Service
 public class UserService {
-    @Autowired
     UserRepository userRepository;
+    BCryptPasswordEncoder encoder;
+
+    public UserService(UserRepository userRepository){
+        this.encoder = new BCryptPasswordEncoder();
+        this.userRepository = userRepository;
+    }
 
     public List<UserModel> getAllUsers(){
         List<UserModel> userList = userRepository.findAll();
@@ -32,9 +40,11 @@ public class UserService {
         if(existingUserByTelephone.isPresent()){
             throw new RuntimeException();
         }
+        String encoder = this.encoder.encode(userDto.password());
         var userModel = new UserModel();
 
         BeanUtils.copyProperties(userDto, userModel);
+        userModel.setPassword(encoder);
 
         UserModel savedUser = userRepository.save(userModel);
         return savedUser;
@@ -54,7 +64,9 @@ public class UserService {
             userModel.setEmail(userDto.email());
         }
         if(!userDto.password().isEmpty()){
-            userModel.setPassword(userDto.password());
+            String encode = this.encoder.encode(userDto.password());
+            userModel.setPassword(encode);
+
         }
         if(!userDto.telephone().isEmpty()){
             userModel.setTelephone(userDto.telephone());
@@ -71,4 +83,19 @@ public class UserService {
             throw new RuntimeException("User not found with id: " + id);
         }
     }
+
+    public boolean validatePassword(UserLoginDto userLoginDto) {
+        Optional<UserModel> existingUserOptional = userRepository.findByEmail(userLoginDto.email());
+        if (existingUserOptional.isPresent()) {
+            UserModel existingUser = existingUserOptional.get();
+
+            String storedPassword = existingUser.getPassword();
+            String inputPassword = userLoginDto.password();
+
+            return encoder.matches(inputPassword, storedPassword);
+        } else {
+            return false;
+        }
+    }
+
 }

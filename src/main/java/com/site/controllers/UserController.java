@@ -1,6 +1,7 @@
 package com.site.controllers;
 
 import com.site.dto.UserDto;
+import com.site.dto.UserLoginDto;
 import com.site.models.UserModel;
 import com.site.repositories.UserRepository;
 import com.site.services.UserService;
@@ -54,5 +55,14 @@ public class UserController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserModel> login(@RequestBody UserLoginDto userLoginDto){
+        boolean valid = userService.validatePassword(userLoginDto);
+        if(!valid) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
