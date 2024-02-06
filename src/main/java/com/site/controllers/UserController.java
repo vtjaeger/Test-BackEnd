@@ -3,9 +3,13 @@ package com.site.controllers;
 import com.site.dto.UserDto;
 import com.site.models.UserModel;
 import com.site.repositories.UserRepository;
+import com.site.services.UserService;
 import jakarta.validation.Valid;
+import org.apache.catalina.User;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,20 +23,26 @@ public class UserController {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    UserService userService;
+
     @GetMapping
-    public List<UserModel> getAllUsers(){
-        return userRepository.findAll();
+    public ResponseEntity<List<UserModel>> getAllUsers(){
+        List<UserModel> userList = userRepository.findAll();
+        return ResponseEntity.status(HttpStatus.OK).body(userList);
     }
 
     @PostMapping
-    public UserModel saveUser(@RequestBody @Valid UserDto userDto){
+    public ResponseEntity<UserModel> saveUser(@RequestBody @Valid UserDto userDto){
         var userModel = new UserModel();
         BeanUtils.copyProperties(userDto, userModel);
-        return userRepository.save(userModel);
+        UserModel savedUser = userRepository.save(userModel);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
 
     @PutMapping("/{id}")
-    public UserModel editUser(@PathVariable(value = "id") UUID id, @RequestBody @Valid UserDto userDto) {
+    public ResponseEntity<UserModel> updateUser(@PathVariable(value = "id") UUID id, @RequestBody @Valid UserDto userDto) {
         Optional<UserModel> existingUser = userRepository.findById(id);
 
         if (existingUser.isEmpty()) {
@@ -52,16 +62,19 @@ public class UserController {
             userModel.setTelephone(userDto.telephone());
         }
 
-        return userRepository.save(userModel);
+        UserModel updatedUser = userRepository.save(userModel);
+
+        return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
     }
 
     @DeleteMapping("/{id}")
-    public Optional<UserModel> deleteUser(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<?> deleteUser(@PathVariable(value = "id") UUID id) {
         Optional<UserModel> userDeleted = userRepository.findById(id);
         if (userDeleted.isPresent()) {
             UserModel user = userDeleted.get();
             userRepository.deleteById(user.getId());
+            return ResponseEntity.ok().build();
         }
-        return userDeleted;
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 }
