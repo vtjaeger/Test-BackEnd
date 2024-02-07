@@ -56,13 +56,4 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-
-    @PostMapping("/login")
-    public ResponseEntity<UserModel> login(@RequestBody UserLoginDto userLoginDto){
-        boolean valid = userService.validatePassword(userLoginDto);
-        if(!valid) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
 }
