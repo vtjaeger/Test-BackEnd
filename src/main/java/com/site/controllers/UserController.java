@@ -1,20 +1,16 @@
 package com.site.controllers;
 
 import com.site.dto.UserDto;
-import com.site.dto.UserLoginDto;
 import com.site.models.UserModel;
 import com.site.repositories.UserRepository;
 import com.site.services.UserService;
 import jakarta.validation.Valid;
-import org.apache.catalina.User;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController

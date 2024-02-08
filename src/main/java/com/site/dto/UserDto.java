@@ -1,16 +1,16 @@
 package com.site.dto;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record UserDto(
-        @NotNull
+        @NotBlank
         String name,
-        @NotNull
+        @NotBlank
         @Email
         String email,
-        @NotNull
+        @NotBlank
         String password,
-        @NotNull
+        @NotBlank
         String telephone) {
 }

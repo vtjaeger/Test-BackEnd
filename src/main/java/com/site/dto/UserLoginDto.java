@@ -1,10 +1,10 @@
 package com.site.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record UserLoginDto(
-        @NotNull
+        @NotBlank
         String email,
-        @NotNull
+        @NotBlank
         String password) {
 }
