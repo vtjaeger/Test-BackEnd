@@ -22,6 +22,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+
     public List<UserModel> getAllUsers(){
         List<UserModel> userList = userRepository.findAll();
         return userList;
@@ -92,6 +93,10 @@ public class UserService {
         } else {
             return false;
         }
+    }
+
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
 }
