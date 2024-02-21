@@ -5,6 +5,8 @@ import com.site.dto.UserLoginDto;
 import com.site.models.UserModel;
 import com.site.repositories.UserRepository;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,23 +30,11 @@ public class UserService {
         return userList;
     }
 
-    public UserModel saveUser(UserDto userDto) {
-        Optional<UserModel> existingUserByEmail = userRepository.findByEmail(userDto.email());
-        if(existingUserByEmail.isPresent()) {
-            throw new RuntimeException();
-        }
-        Optional<UserModel> existingUserByTelephone = userRepository.findByTelephone(userDto.telephone());
-        if(existingUserByTelephone.isPresent()){
-            throw new RuntimeException();
-        }
-        String encoder = this.encoder.encode(userDto.password());
-        var userModel = new UserModel();
+    public ResponseEntity saveUser(UserDto userDto) {
+        UserModel newUser = new UserModel(userDto);
 
-        BeanUtils.copyProperties(userDto, userModel);
-        userModel.setPassword(encoder);
-
-        UserModel savedUser = userRepository.save(userModel);
-        return savedUser;
+        userRepository.save(newUser);
+        return ResponseEntity.ok().build();
     }
 
     public UserModel updateUser(UUID id, UserDto userDto) {
@@ -78,20 +68,6 @@ public class UserService {
             return true;
         } else {
             throw new RuntimeException("User not found with id: " + id);
-        }
-    }
-
-    public boolean validatePassword(UserLoginDto userLoginDto) {
-        Optional<UserModel> existingUserOptional = userRepository.findByEmail(userLoginDto.email());
-        if (existingUserOptional.isPresent()) {
-            UserModel existingUser = existingUserOptional.get();
-
-            String storedPassword = existingUser.getPassword();
-            String inputPassword = userLoginDto.password();
-
-            return encoder.matches(inputPassword, storedPassword);
-        } else {
-            return false;
         }
     }
 

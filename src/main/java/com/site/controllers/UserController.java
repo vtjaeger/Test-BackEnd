@@ -29,7 +29,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserModel> saveUser(@RequestBody @Valid UserDto userDto){
+    public ResponseEntity<?> saveUser(@RequestBody @Valid UserDto userDto){
         try{
             return ResponseEntity.status(HttpStatus.CREATED).body(userService.saveUser(userDto));
         } catch (Exception e){
